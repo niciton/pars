@@ -1,14 +1,11 @@
 <template>
   
   <div :class="['products', 'container', {'product-load': isLoad}]" @click="listingProductClick">
-    <form @submit.prevent ref="searchForm" class="search">
-      <input type="text" name="search" class="search__inp" placeholder="поиск">
+    <form @submit.prevent class="search">
+      <input @input="setSearch" type="text" name="search" class="search__inp" placeholder="поиск">
     </form>
-
-    <stile></stile>
     
     <div v-if="isLoad" class="products">
-      <!-- <product :product="bProduct" /> -->
       <template v-for="(product, i) in loadData" :key="i">
         <product :product="product" />
       </template>
@@ -29,16 +26,18 @@
         <div class="analog__wrap">
           <div v-for="(analog, index) in analogsArr" :key="index" :class="['analog', {'bAnalog': index === 0}]">
             <div class="analog__price-bonus">
-              "выгода": {{ analog.price - analog.creditPaymentAmount }} ₽
+              "выгода": {{ analog.price - analog.bonusInfoGroups[0]?.totalAmount || 0 + analog.bonusInfoGroups[analog.bonusInfoGroups.length - 1]?.totalAmount || 0 }} ₽
             </div>
             <div class="analog__price">
               цена: {{ analog.price }} ₽
             </div>
             <div class="analog__bonus">
               бонусы: <div class="bonus">
-                {{ formatPrice(analog.bonusInfoGroups[0].totalAmount + analog.bonusInfoGroups[2].totalAmount, 0) }} 
+                {{ formatPrice(analog.bonusInfoGroups[0]?.totalAmount || 0 + analog.bonusInfoGroups[analog.bonusInfoGroups.length - 1]?.totalAmount || 0, 0) }} 
                 <div class="spasibo"></div>
-                <div class="percent">{{ analog.creditPaymentAmount }}</div>
+                <div class="percent">
+                  {{ analog.bonusInfoGroups[0]?.percent || 0 + analog.bonusInfoGroups[analog.bonusInfoGroups.length - 1]?.percent || 0 }} %
+                </div>
               </div>
             </div>
           </div>
@@ -58,19 +57,30 @@ import axios from "axios";
 import type { productT } from "@/types/product";
 import { copyToClipboard, formatPrice } from "@/other/js/helper.js";
 
+type searchInfoT = {
+  searchVal: Ref,
+  delay: number,
+  // timer: NodeJS.Timeout | number | undefined,
+  timer: ReturnType<typeof setTimeout> | undefined,
+}
+
 let data: productT[] = reactive([]);
-let analogsArr: any[] = reactive([]);
 let bProductArr: productT[] = [];
 let bProduct: productT;
 let isLoad: Ref = ref(false);
+
 let isOpenAnalogsModal: Ref = ref(false);
 let mainAnalogInfo: any = reactive({});
-let searchForm: Ref = ref(null);
+let analogsArr: any[] = reactive([]);
 
+let searchInfo: searchInfoT = {
+  searchVal: ref(""),
+  delay: 450,
+  timer: undefined,
+} 
 
 onMounted(() => {
-  // console.log(document);
-  console.log(searchForm.value);
+  // console.log(searchForm.value);
 });
 
 // const copyInp = document.getElementById("copy-inp");
@@ -94,8 +104,21 @@ async function getProducts() {
   };
 }
 
+function setSearch(e: Event) {
+  const val = (e.target as HTMLInputElement).value;
+
+  clearTimeout(searchInfo.timer);
+  searchInfo.timer = undefined;
+
+  // console.log(val);
+  searchInfo.timer = setTimeout(() => {
+    searchInfo.searchVal.value = val;
+    searchInfo.timer = undefined;
+  }, searchInfo.delay)
+
+}
+
 function setIsOpenAnalogsModal(e: {isOpen: boolean}) {
-// function setIsOpenAnalogsModal(e: CustomEvent) {
   analogsArr.length = 0;
   isOpenAnalogsModal.value = e.isOpen;
 }
@@ -117,25 +140,22 @@ function listingProductClick(e: Event) {
     // hydratorState.PrefetchStore.componentsInitialState['catalog.details'].offersData.offers
     axios.post("http://0.0.0.0:5757/", {url})
     .then(({ data }) => {
-      const arr: any[] = data[0].hydratorState.PrefetchStore.componentsInitialState['catalog.details'].offersData.offers;
+      const arr: any[] = data.offersData.offers;
 
-      Object.assign(mainAnalogInfo, data[0].hydratorState.PrefetchStore.componentsInitialState['catalog.details'].mainInfo);
-      console.log(data[0].hydratorState.PrefetchStore.componentsInitialState['catalog.details']);
+      Object.assign(mainAnalogInfo, data.mainInfo);
 
       arr.sort((analog1, analog2) => {
-        console.log(analog1.bonusInfoGroups[analog1.bonusInfoGroups.length - 1]);
-        const primeBonus1 = analog1.bonusInfoGroups[analog1.bonusInfoGroups.length - 1].totalAmount;
-        const primeBonus2 = analog1.bonusInfoGroups[analog2.bonusInfoGroups.length - 1].totalAmount;
+        const primeBonus1 = analog1.bonusInfoGroups[analog1.bonusInfoGroups.length - 1]?.totalAmount || 0;
+        const primeBonus2 = analog2.bonusInfoGroups[analog2.bonusInfoGroups.length - 1]?.totalAmount || 0;
 
-        const bonus1 = analog1.bonusInfoGroups[0].totalAmount + primeBonus1;
-        const bonus2 = analog2.bonusInfoGroups[0].totalAmount + primeBonus2;
+        const bonus1 = analog1.bonusInfoGroups[0]?.totalAmount || 0 + primeBonus1;
+        const bonus2 = analog2.bonusInfoGroups[0]?.totalAmount || 0 + primeBonus2;
 
         return analog1.price - bonus1 < analog2.price - bonus2 ? -1 : 1;
       })
      
       analogsArr.push(...arr);
     })
-    return;
   }
 }
 
@@ -144,12 +164,15 @@ function listingProductClick(e: Event) {
 
 getProducts().then(($data) => {
   data.length = 0;
-  // console.log(bProduct);
   data.push(...[ ...$data.products]);
 });
 
 const loadData = computed(() => {
-  return data;
+  const reg = RegExp(searchInfo.searchVal.value, "gi");
+  const products = data.filter((product: productT) => {
+    return reg.test(product.goods.title);
+  });
+  return products.slice(0, 12);
 });
 </script>
 
@@ -162,7 +185,7 @@ const loadData = computed(() => {
 
 .search {
   &__inp {
-
+    outline: none;
   }
 }
 

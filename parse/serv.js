@@ -1,10 +1,8 @@
 const http = require("http");
 
-// const axios = require("axios");
-// const fs = require("fs")
 
-const puppeteer = require("puppeteer-extra");
 // const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-extra");
 const blockResourcesPlugin = require('puppeteer-extra-plugin-block-resources')();
 puppeteer.use(blockResourcesPlugin);
 
@@ -15,20 +13,11 @@ let browser, page;
   // const page = await browser.newPage();
 
   browser = await puppeteer.launch({ headless: false, timeout: 0, });
-
-  // const getPage = async () => {
-  //   if (page) page = await browser.newPage();
-  //   return page;
-  // }
-
   page = await browser.newPage();
 
   const getMainObj = async (url) => {
     // const browser = await puppeteer.launch({ headless: false, timeout: 0, });
-    // page = await browser.newPage();
-    
-    // if (!browser) browser = await puppeteer.launch({ headless: false, timeout: 0, });
-    // if (!page) page = await browser.newPage();
+    // const page = await browser.newPage();
 
     // ускоряет получение данных
     page?.setJavaScriptEnabled(false);
@@ -38,22 +27,50 @@ let browser, page;
     blockResourcesPlugin.blockedTypes.add("other");
 
     const fetchUrl = `${url}`;
+    await page.goto(fetchUrl, { waitUntil: 'domcontentloaded' });
 
-    (await page).goto(fetchUrl, { waitUntil: 'domcontentloaded' });
+    const bodyScript = await page.waitForSelector("body > script:not([type],[src])");
 
-    const bodyScript = await page.waitForSelector("body > script");
+    return await bodyScript.evaluate((el) => {
+      const infoArr = el.innerHTML.match(/[\w\W.+]{0,200}/gi);
+      return JSON.parse(`{${el.innerHTML.replace(/(\n)|(undefined)/g, (val) => val === "\n" ? "" : "null" ).match(/"offersData":.+,"breadcrumbs"/gm)[0]}:[]}`)
+      let isWriteInfo = false;
+      let result = "";
 
-    const mainObj = await bodyScript.evaluate((el) => {
-      const appObj = el.innerHTML
-        // undefined нет в JSON формате
-        .replace(/(undefined)|(window.__APP__=)/g, (val) => val === "undefined" ? "null" : "")
-        .replace(/,"experimentValue":[\W\w]+?}}/, "}");
-      return appObj ? JSON.parse(`[${appObj}]`) : [];
+      for (let i = 0; i < infoArr.length; i++) {
+        const info = infoArr[i].replace(/\n/g, "");
+        const infoFind = `${info + (i === 0 ? "" : infoArr[i- 1])}`.replace(/\n/g, "");
+
+        if (!isWriteInfo) isWriteInfo = /"offersData":/.test(infoFind);
+
+        // if (/\n/.test(info)) console.log(info); 
+
+        if (isWriteInfo) {
+          if (!result) {
+            result += info.match(/"offersData":.+/ig)?.[0] || "";
+            if (!result) result += infoFind.match(/"offersData":.+/ig)?.[0] || "";
+          } else {
+
+            const infoNextFind = `${info + infoArr[i + 1]}`.replace(/\n/g, "");
+            isWriteInfo = !/"breadcrumbs":/.test(infoNextFind);
+
+            if (!isWriteInfo && result) {
+              result += infoNextFind.split(/,"breadcrumbs"/)?.[0] || "";
+              continue;
+            } else {
+              result += info.split(/,"breadcrumbs"/)?.[0] || "";
+            }
+          }
+
+          // if (/"breadcrumbs":/.test(infoFind)) continue;
+        } 
+      }
+
+      // undefined нет в JSON формате
+      result = result.replace(/undefined/g, "null");
+      // console.log(`${result}`);
+      return JSON.parse(`{${result}}`);
     });
-
-    // browser.close();
-
-    return mainObj;
   };
 
   const PORT = 5757;
@@ -71,8 +88,10 @@ let browser, page;
     let obj = JSON.stringify([{}]);
 
     req.on("data", async (chunk) => {
+      console.log("obj_1", obj);
       const { url } = JSON.parse(String(chunk));
       obj = JSON.stringify(await getMainObj(url));
+      // console.log("obj", obj);
 
       res.end(obj);
     });
