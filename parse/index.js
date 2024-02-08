@@ -106,7 +106,7 @@ const getMainObj = async () => {
     const fetchUrl = `${url.vCarts}/page-${i + 1}/`
     await page.goto(fetchUrl, { waitUntil: 'domcontentloaded' });
 
-    const bodyScript = await page.waitForSelector("body > script");
+    const bodyScript = await page.waitForSelector("body > script:not([type],[src])");
     
     const mainObj = await bodyScript.evaluate((el) => {
       const appObj = el.innerHTML
@@ -115,7 +115,8 @@ const getMainObj = async () => {
       return appObj ? JSON.parse(`[${appObj}]`) : [];
     });
 
-    if (mainObj[0]?.hydratorState?.PlpStore?.listingData?.items) products.push(...(mainObj[0].hydratorState.PlpStore.listingData.items));
+    if (mainObj[0]?.hydratorState?.PlpStore?.listingData?.items?.length) products.push(...(mainObj[0].hydratorState.PlpStore.listingData.items));
+    else continue;
   }
 
   (await browser).close();
