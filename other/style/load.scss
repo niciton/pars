@@ -66,6 +66,7 @@
     animation-duration: var(--animation-duration);
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
+    animation: load 1s ease-in-out 0s infinite 1s;
   }
 }
 

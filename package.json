@@ -24,6 +24,7 @@
     "axios": "^1.6.2",
     "browser-env": "^3.3.0",
     "cheerio": "^1.0.0-rc.12",
+    "html-element": "^2.3.1",
     "pinia": "^2.1.7",
     "vuex": "^4.1.0"
   }
