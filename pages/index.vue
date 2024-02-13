@@ -1,179 +1,73 @@
 <template>
-  
-  <div :class="['products', 'container', {'product-load': isLoad}]" @click="listingProductClick">
+  <div :class="['container']">
     <form @submit.prevent class="search">
-      <input @input="setSearch" type="text" name="search" class="search__inp" placeholder="поиск">
+      <input
+        @input="setSearch"
+        type="text"
+        name="search"
+        class="search__inp"
+        placeholder="поиск"
+      />
+      <input
+        @input="setSearch"
+        type="text"
+        name="exclude"
+        class="search__inp-exclude"
+        placeholder="исключить из поиск"
+      />
+
+      <select class="search__search" @change="setSort" name="sort">
+        <option disabled selected value="1">по Умолчанию</option>
+        <option value="2">сначала дешевле</option>
+        <option value="3">сначала дороже</option>
+      </select>
+
+      <select class="search__search" @change="setDelivery" name="delivery">
+        <option selected value="1">любая доставка</option>
+        <option value="2">доставка сегодня</option>
+        <option value="3">доставка завтра или позже</option>
+      </select>
     </form>
-    
-    <div v-if="isLoad" class="products">
-      <template v-for="(product, i) in loadData" :key="i">
-        <product :product="product" />
-      </template>
-    </div>
-    <div v-else class="load-screen">load...</div>
+
+    <product-list :filters="searchInfo" />
   </div>
-  <app-modal modalName="analogsModal" :isOpen="isOpenAnalogsModal" @toggleOpen="setIsOpenAnalogsModal">
-    <div :class="['analogs', {'loaded': !analogsArr.length}]">
-      <template v-if="analogsArr.length">
-        <div class="analogs__head" v-if="mainAnalogInfo.mainImage">
-          <div class="analogs__img">
-            <img :src="mainAnalogInfo.mainImage" alt="" lang="lazy">
-          </div>
-          <div class="analogs__title">
-            {{ mainAnalogInfo.name }}
-          </div>
-        </div>
-        <div class="analog__wrap">
-          <div v-for="(analog, index) in analogsArr" :key="index" :class="['analog', {'bAnalog': index === 0}]">
-            <div class="analog__price-bonus">
-              "выгода": {{ analog.price - analog.bonusInfoGroups[0]?.totalAmount || 0 + analog.bonusInfoGroups[analog.bonusInfoGroups.length - 1]?.totalAmount || 0 }} ₽
-            </div>
-            <div class="analog__price">
-              цена: {{ analog.price }} ₽
-            </div>
-            <div class="analog__bonus">
-              бонусы: <div class="bonus">
-                {{ formatPrice(analog.bonusInfoGroups[0]?.totalAmount || 0 + analog.bonusInfoGroups[analog.bonusInfoGroups.length - 1]?.totalAmount || 0, 0) }} 
-                <div class="spasibo"></div>
-                <div class="percent">
-                  {{ analog.bonusInfoGroups[0]?.percent || 0 + analog.bonusInfoGroups[analog.bonusInfoGroups.length - 1]?.percent || 0 }} %
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </template>
-      <template v-else>
-        <div>
-          analogs load...
-        </div>
-      </template>
-    </div>
-  </app-modal>
 </template>
 
 <script setup lang="ts">
-import axios from "axios";
-import type { productT } from "@/types/product";
-import { copyToClipboard, formatPrice } from "@/other/js/helper.js";
-
 type searchInfoT = {
-  searchVal: Ref,
-  delay: number,
-  // timer: NodeJS.Timeout | number | undefined,
-  timer: ReturnType<typeof setTimeout> | undefined,
-}
-
-let data: productT[] = reactive([]);
-let bProductArr: productT[] = [];
-let bProduct: productT;
-let isLoad: Ref = ref(false);
-
-let isOpenAnalogsModal: Ref = ref(false);
-let mainAnalogInfo: any = reactive({});
-let analogsArr: any[] = reactive([]);
+  searchVal: Ref;
+  excludeVal: Ref;
+  sortVal: Ref<1 | 2 | 3>;
+  delivery: Ref<1 | 2 | 3>;
+  delay: number;
+  timer: ReturnType<typeof setTimeout> | undefined;
+};
 
 let searchInfo: searchInfoT = {
   searchVal: ref(""),
+  excludeVal: ref(""),
+  sortVal: ref(1),
+  delivery: ref(1),
   delay: 450,
   timer: undefined,
-} 
+};
 
-onMounted(() => {
-  // console.log(searchForm.value);
-});
-
-// const copyInp = document.getElementById("copy-inp");
-
-async function getProducts() {
-  const jsonData: productT[] = (await axios.get("/data/products.json")).data;
-  console.log(jsonData[0]);
-  bProduct = jsonData[0];
-
-  for (let i = 0; i < jsonData.length; i++) {
-    const product = jsonData[i];
-    if (product.bonusPercent > bProduct.bonusPercent) {
-      bProductArr.push(product);
-    }
-  }
-
-  isLoad.value = true;
-
-  return {
-    products: jsonData,
-  };
+function setSort({ target }: Event) {
+  searchInfo.sortVal.value = +(target as HTMLSelectElement).value as 1 | 2 | 3;
 }
 
-function setSearch(e: Event) {
-  const val = (e.target as HTMLInputElement).value;
+function setDelivery({ target }: Event) {
+  searchInfo.delivery.value = +(target as HTMLSelectElement).value as 1 | 2 | 3;
+}
+
+function setSearch({ target }: Event) {
+  const { value, name } = (target as HTMLInputElement);
 
   clearTimeout(searchInfo.timer);
-  searchInfo.timer = undefined;
-
-  // console.log(val);
   searchInfo.timer = setTimeout(() => {
-    searchInfo.searchVal.value = val;
-    searchInfo.timer = undefined;
-  }, searchInfo.delay)
-
+    searchInfo[name === "search" ? "searchVal" : "excludeVal"].value = value;
+  }, searchInfo.delay);
 }
-
-function setIsOpenAnalogsModal(e: {isOpen: boolean}) {
-  analogsArr.length = 0;
-  isOpenAnalogsModal.value = e.isOpen;
-}
-
-function listingProductClick(e: Event) {
-  const title = (e.target as HTMLElement).closest(".product__title[title]");
-  const analogBtn = ((e.target as HTMLElement).closest(".val__analogs[data-link]"))
-
-  if (title) {
-    copyToClipboard(title.getAttribute("title")?.trim() || "")
-    e.preventDefault();
-    return;
-  }
-
-  if (analogBtn) {
-    const url = analogBtn.getAttribute("data-link");
-    isOpenAnalogsModal.value = true;
-
-    // hydratorState.PrefetchStore.componentsInitialState['catalog.details'].offersData.offers
-    axios.post("http://0.0.0.0:5757/", {url})
-    .then(({ data }) => {
-      const arr: any[] = data.offersData.offers;
-
-      Object.assign(mainAnalogInfo, data.mainInfo);
-
-      arr.sort((analog1, analog2) => {
-        const primeBonus1 = analog1.bonusInfoGroups[analog1.bonusInfoGroups.length - 1]?.totalAmount || 0;
-        const primeBonus2 = analog2.bonusInfoGroups[analog2.bonusInfoGroups.length - 1]?.totalAmount || 0;
-
-        const bonus1 = analog1.bonusInfoGroups[0]?.totalAmount || 0 + primeBonus1;
-        const bonus2 = analog2.bonusInfoGroups[0]?.totalAmount || 0 + primeBonus2;
-
-        return analog1.price - bonus1 < analog2.price - bonus2 ? -1 : 1;
-      })
-     
-      analogsArr.push(...arr);
-    })
-  }
-}
-
-//  console.log((async () => { return (await getProducts()).products})());
-// const smallData = (async () => reactive([...(await getProducts()).products.splice(0, 21)]))();
-
-getProducts().then(($data) => {
-  data.length = 0;
-  data.push(...[ ...$data.products]);
-});
-
-const loadData = computed(() => {
-  const reg = RegExp(searchInfo.searchVal.value, "gi");
-  const products = data.filter((product: productT) => {
-    return reg.test(product.goods.title);
-  });
-  return products.slice(0, 12);
-});
 </script>
 
 <style lang="scss">
@@ -184,8 +78,21 @@ const loadData = computed(() => {
 }
 
 .search {
-  &__inp {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 50px;
+
+  input,
+  select {
     outline: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 0px solid #000;
+  }
+
+  &__inp {
+    &-exclude {
+    }
   }
 }
 
@@ -245,9 +152,11 @@ const loadData = computed(() => {
       // padding-right: 35px;
     }
 
-    &__price-bonus {}
+    &__price-bonus {
+    }
 
-    &__price {}
+    &__price {
+    }
 
     &__bonus {
       display: flex;
