@@ -12,7 +12,15 @@ let browser, page;
   // browser = await puppeteer.launch({ headless: false, timeout: 0, });
   // const page = await browser.newPage();
 
-  browser = await puppeteer.launch({ headless: false, timeout: 0, });
+  browser = await puppeteer.launch({ 
+    headless: false, 
+
+    args: [
+      "--disable-background-timer-throttling",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-renderer-backgrounding",
+    ],
+  });
   page = await browser.newPage();
 
   const getMainObj = async (url) => {
@@ -32,44 +40,7 @@ let browser, page;
     const bodyScript = await page.waitForSelector("body > script:not([type],[src])");
 
     return await bodyScript.evaluate((el) => {
-      const infoArr = el.innerHTML.match(/[\w\W.+]{0,200}/gi);
       return JSON.parse(`{${el.innerHTML.replace(/(\n)|(undefined)/g, (val) => val === "\n" ? "" : "null" ).match(/"offersData":.+,"breadcrumbs"/gm)[0]}:[]}`)
-      let isWriteInfo = false;
-      let result = "";
-
-      for (let i = 0; i < infoArr.length; i++) {
-        const info = infoArr[i].replace(/\n/g, "");
-        const infoFind = `${info + (i === 0 ? "" : infoArr[i- 1])}`.replace(/\n/g, "");
-
-        if (!isWriteInfo) isWriteInfo = /"offersData":/.test(infoFind);
-
-        // if (/\n/.test(info)) console.log(info); 
-
-        if (isWriteInfo) {
-          if (!result) {
-            result += info.match(/"offersData":.+/ig)?.[0] || "";
-            if (!result) result += infoFind.match(/"offersData":.+/ig)?.[0] || "";
-          } else {
-
-            const infoNextFind = `${info + infoArr[i + 1]}`.replace(/\n/g, "");
-            isWriteInfo = !/"breadcrumbs":/.test(infoNextFind);
-
-            if (!isWriteInfo && result) {
-              result += infoNextFind.split(/,"breadcrumbs"/)?.[0] || "";
-              continue;
-            } else {
-              result += info.split(/,"breadcrumbs"/)?.[0] || "";
-            }
-          }
-
-          // if (/"breadcrumbs":/.test(infoFind)) continue;
-        } 
-      }
-
-      // undefined нет в JSON формате
-      result = result.replace(/undefined/g, "null");
-      // console.log(`${result}`);
-      return JSON.parse(`{${result}}`);
     });
   };
 
