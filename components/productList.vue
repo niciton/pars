@@ -81,6 +81,7 @@
 </template>
 
 <script setup lang="ts">
+
 import axios from "axios";
 import type { productT } from "@/types/product";
 import { copyToClipboard, formatPrice } from "@/other/js/helper.js";
@@ -121,7 +122,7 @@ let bProductArr: productT[] = [];
 let bProduct: productT;
 let isLoad: Ref = ref(false);
 
-let isOpenAnalogsModal: Ref = ref(false);
+let isOpenAnalogsModal: Ref<boolean> = ref(false);
 let mainAnalogInfo: any = reactive({});
 let analogsArr: any[] = reactive([]);
 
@@ -152,7 +153,6 @@ function listingProductClick(e: Event) {
 
   if (title) {
     copyToClipboard(title.getAttribute("title")?.trim() || "");
-    e.preventDefault();
     return;
   }
 
@@ -250,3 +250,76 @@ const loadData = computed(() => {
   return products.map((product) => product);
 });
 </script>
+
+<style lang="scss">
+
+.analogs {
+  background: #ffffff;
+  color: #2c2c2c;
+  padding: 40px 15px;
+  max-height: 85vh;
+  overflow: hidden;
+
+  &.loaded {
+    font-size: 40px;
+  }
+
+  &__head {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+  }
+
+  &__img {
+    width: 100px;
+    height: 100px;
+    display: flex;
+
+    img {
+      max-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__title {
+    font-size: 30px;
+  }
+
+  .analog {
+    padding: 20px 10px;
+    margin-top: 20px;
+    border-radius: 9px;
+    background: #f2f2f2;
+    // box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.2);
+
+    &.bAnalog {
+      margin-top: 0;
+      box-shadow: inset 0px 0px 20px #0ed40e50;
+      // background: rgb(223,178,23);
+      // background: linear-gradient(30deg, rgba(223,178,23,1) 0%, rgba(143,227,38,1) 48%, rgba(18,119,22,1) 100%);
+    }
+
+    &__wrap {
+      overflow-y: auto;
+      overflow-x: hidden;
+      max-height: 550px;
+      margin-top: 20px;
+      // padding: 20px;
+      // padding-right: 35px;
+    }
+
+    &__price-bonus {
+    }
+
+    &__price {
+    }
+
+    &__bonus {
+      display: flex;
+      gap: 3px;
+    }
+  }
+}
+
+</style>
