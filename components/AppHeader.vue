@@ -13,8 +13,8 @@
       </ul>
     </nav>
 
-    <form action="">
-      
+    <form>
+      <input type="search" name="search" class="search__inp">
     </form>
   </header>
   <h2>header</h2>
