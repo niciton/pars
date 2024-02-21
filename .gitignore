@@ -29,3 +29,6 @@ logs
 *.zip
 *.txt
 *-lock.json
+
+db
+parse/test
