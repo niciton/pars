@@ -25,7 +25,10 @@ logs
 
 # other
 
-.vscode/
+.vscode
 *.zip
 *.txt
 *-lock.json
+
+db
+parse/test

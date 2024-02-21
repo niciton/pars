@@ -49,7 +49,8 @@
   }
 }
 
-button{
+button, 
+select {
   cursor: pointer;
 }
 

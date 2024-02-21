@@ -4,9 +4,9 @@
       <img :src="app.petImg()" :alt="app.getTitle()" loading="lazy" />
     </div>
     <div class="product__body">
-      <div class="product__title" :title="app.getTitle()">
+      <a :href="app.getWebUrl()" class="product__title" :title="app.getTitle()">
         {{ app.getTitle() }}
-      </div>
+      </a>
       <div class="product__price">
         <div class="val__rub" v-html="app.getPrice()"></div>
         <div class="val__bonus bonus" :style="`--bonus-percent: ${app.getBonus().percent}%`" v-html="app.getBonus().priceFormat"></div>
@@ -31,9 +31,7 @@ type PropsType = {
 const { product } = defineProps<PropsType>();
 // []hydratorState.PrefetchStore.componentsInitialState['catalog.details'].offersData.offers
 class ProductApp {
-  constructor() {
-    
-  }
+  constructor() {}
 
   petImg(){
     return product?.goods?.titleImage ? product.goods.titleImage : '';
@@ -74,6 +72,10 @@ class ProductApp {
 
   getLink() {
     return product?.goods?.webUrl ? `${product.goods.webUrl}#?details_block=prices` : ""
+  }
+
+  getWebUrl(){
+    return `product/${product.goods.goodsId}${product.goods.webUrl.split("details")[1]}`
   }
 
   getVariant() {
