@@ -1,8 +1,8 @@
 
-// const puppeteer = require("puppeteer");
-const puppeteer = require("puppeteer-extra");
-const blockResourcesPlugin = require('puppeteer-extra-plugin-block-resources')();
-puppeteer.use(blockResourcesPlugin);
+const puppeteer = require("puppeteer");
+// const puppeteer = require("puppeteer-extra");
+// const blockResourcesPlugin = require('puppeteer-extra-plugin-block-resources')();
+// puppeteer.use(blockResourcesPlugin);
 
 const fs = require("fs");
 
@@ -18,12 +18,24 @@ const getMainObj = async () => {
   
   // ускоряет получение данных
   page.setJavaScriptEnabled(false);
-  blockResourcesPlugin.blockedTypes.add('image');
-  blockResourcesPlugin.blockedTypes.add('stylesheet');
-  blockResourcesPlugin.blockedTypes.add('script');
-  blockResourcesPlugin.blockedTypes.add("other");
+  // blockResourcesPlugin.blockedTypes.add('image');
+  // blockResourcesPlugin.blockedTypes.add('stylesheet');
+  // blockResourcesPlugin.blockedTypes.add('script');
+  // blockResourcesPlugin.blockedTypes.add("other");
+
+  await page.setRequestInterception(true);
+  page.on('request', (request) =>
+  {
+    if (request.resourceType() === 'document')
+    {
+      request.continue();
+    } else
+    {
+      request.abort();
+    }
+  });
   
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 77; i++) {
     const fetchUrl = `${url.vCarts}/page-${i + 1}/`
     await page.goto(fetchUrl, { waitUntil: 'domcontentloaded' });
 
