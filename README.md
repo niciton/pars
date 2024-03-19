@@ -2,6 +2,11 @@
 
 Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
+# mariadb info
+
+https://mariadb.com/kb/en/installing-and-using-mariadb-via-docker/
+https://hub.docker.com/_/mariadb
+
 ## Setup
 
 Make sure to install the dependencies:
