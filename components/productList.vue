@@ -81,7 +81,6 @@
 </template>
 
 <script setup lang="ts">
-
 import axios from "axios";
 import type { productT } from "@/types/product";
 import { copyToClipboard, formatPrice } from "@/other/js/helper.js";
@@ -91,7 +90,7 @@ type filterProps = {
     searchVal?: Ref<string>;
     excludeVal?: Ref<string>;
     limit?: number;
-    sortVal?: Ref<1 | 2 | 3>;
+    sortVal?: Ref<1 | 2 | 3 | 4 | 5>;
     delivery?: Ref<1 | 2 | 3>;
 
     price?: {
@@ -115,7 +114,7 @@ watch(appProps, ({ filters }) => {
   console.log(appFilter.delivery?.value);
 });
 
-const appEmit = defineEmits([""]);
+const appEmit = defineEmits(["lengthProducts"]);
 
 let data: readonlyProductT[] = reactive([]);
 let bProductArr: productT[] = [];
@@ -125,6 +124,63 @@ let isLoad: Ref = ref(false);
 let isOpenAnalogsModal: Ref<boolean> = ref(false);
 let mainAnalogInfo: any = reactive({});
 let analogsArr: any[] = reactive([]);
+
+// axios.post(
+//   "https://megamarket.ru/api/mobile/v2/cartService/offer/add",
+//   JSON.parse("{\"identification\":{\"id\":\"\"},\"offer\":{\"id\":null,\"merchantId\":17264},\"goods\":{\"goodsId\":\"100059878384\"},\"quantity\":1,\"cartType\":\"CART_TYPE_DEFAULT\",\"isBpg20\":false,\"additionalData\":\"{\\\"categories\\\":[],\\\"categoryName\\\":\\\"\\\",\\\"categoryIds\\\":[],\\\"isDayOffer\\\":false,\\\"oldPrice\\\":0,\\\"merchantOldPrice\\\":0,\\\"analytics\\\":{\\\"numberOfReviews\\\":6,\\\"isAddressConfirmed\\\":true,\\\"additionFrom\\\":\\\"block_sales\\\",\\\"additionHow\\\":\\\"default\\\"}}\",\"clientAddress\":null,\"locationId\":null,\"auth\":{\"locationId\":\"50\",\"appPlatform\":\"WEB\",\"appVersion\":1708577038,\"experiments\":{\"8\":\"1\",\"55\":\"2\",\"58\":\"2\",\"62\":\"1\",\"68\":\"1\",\"69\":\"2\",\"79\":\"3\",\"84\":\"2\",\"96\":\"2\",\"98\":\"1\",\"99\":\"1\",\"107\":\"2\",\"109\":\"2\",\"119\":\"2\",\"120\":\"2\",\"121\":\"2\",\"122\":\"2\",\"128\":\"1\",\"130\":\"1\",\"132\":\"2\",\"144\":\"3\",\"147\":\"3\",\"154\":\"2\",\"163\":\"2\",\"173\":\"1\",\"178\":\"1\",\"184\":\"3\",\"186\":\"1\",\"190\":\"2\",\"192\":\"2\",\"194\":\"3\",\"200\":\"2\",\"205\":\"2\",\"209\":\"1\",\"218\":\"1\",\"228\":\"2\",\"229\":\"2\",\"235\":\"2\",\"237\":\"2\",\"243\":\"1\",\"255\":\"1\",\"644\":\"1\",\"645\":\"4\",\"772\":\"2\",\"5779\":\"2\",\"20121\":\"1\",\"70070\":\"1\",\"85160\":\"2\",\"123999\":\"1\"},\"os\":\"UNKNOWN_OS\"}}"),
+//   {
+//   "headers": {
+//     "accept": "application/json",
+//     "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+//     "cache-control": "no-cache",
+//     "content-type": "application/json",
+//     "pragma": "no-cache",
+//     "sec-ch-ua": "\"Not A(Brand\";v=\"99\", \"Google Chrome\";v=\"121\", \"Chromium\";v=\"121\"",
+//     "sec-ch-ua-mobile": "?0",
+//     "sec-ch-ua-platform": "\"Linux\"",
+//     "sec-fetch-dest": "empty",
+//     "sec-fetch-mode": "cors",
+//     "sec-fetch-site": "same-origin",
+//     "x-requested-with": "XMLHttpRequest"
+//   },
+//   // "referrer": "https://megamarket.ru/catalog/details/videokarta-gigabyte-rtx4090-windforce-v2-24gb-100059878384_17264/",
+//   // "referrerPolicy": "strict-origin-when-cross-origin",
+//   // "mode": "cors",
+//   // "credentials": "include"
+// });
+
+(async () => {
+  const { data, pending, error, refresh } = await useFetch(
+    "https://megamarket.ru/api/mobile/v2/cartService/offer/add",
+    {
+      method: "post",
+      body: JSON.parse(
+        '{"identification":{"id":""},"offer":{"id":null,"merchantId":17264},"goods":{"goodsId":"100059878384"},"quantity":1,"cartType":"CART_TYPE_DEFAULT","isBpg20":false,"additionalData":"{\\"categories\\":[],\\"categoryName\\":\\"\\",\\"categoryIds\\":[],\\"isDayOffer\\":false,\\"oldPrice\\":0,\\"merchantOldPrice\\":0,\\"analytics\\":{\\"numberOfReviews\\":6,\\"isAddressConfirmed\\":true,\\"additionFrom\\":\\"block_sales\\",\\"additionHow\\":\\"default\\"}}","clientAddress":null,"locationId":null,"auth":{"locationId":"50","appPlatform":"WEB","appVersion":1708577038,"experiments":{"8":"1","55":"2","58":"2","62":"1","68":"1","69":"2","79":"3","84":"2","96":"2","98":"1","99":"1","107":"2","109":"2","119":"2","120":"2","121":"2","122":"2","128":"1","130":"1","132":"2","144":"3","147":"3","154":"2","163":"2","173":"1","178":"1","184":"3","186":"1","190":"2","192":"2","194":"3","200":"2","205":"2","209":"1","218":"1","228":"2","229":"2","235":"2","237":"2","243":"1","255":"1","644":"1","645":"4","772":"2","5779":"2","20121":"1","70070":"1","85160":"2","123999":"1"},"os":"UNKNOWN_OS"}}'
+      ),
+      headers: {
+        accept: "application/json",
+        "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+        "cache-control": "no-cache",
+        "content-type": "application/json",
+        pragma: "no-cache",
+        "sec-ch-ua":
+          '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"Linux"',
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        // "x-requested-with": "XMLHttpRequest",
+      },
+      referrer:
+        "https://megamarket.ru/catalog/details/videokarta-gigabyte-rtx4090-windforce-v2-24gb-100059878384_17264/",
+      referrerPolicy: "strict-origin-when-cross-origin",
+      mode: "cors",
+      credentials: "include",
+    }
+  );
+  console.log(data.value, data.value?.message);
+})();
 
 async function getProducts() {
   const jsonData: productT[] = (await axios.get("/data/products.json")).data;
@@ -198,13 +254,27 @@ getProducts().then(($data) => {
 
 const sortingValues = {
   sort: {
+    // по умолчанию
     1: (product1: productT, product2: productT) => 1,
 
+    // сначала дешевле
     2: (product1: productT, product2: productT) =>
       product1.price > product2.price ? 1 : -1,
 
+    // сначала дороже
     3: (product1: productT, product2: productT) =>
       product1.price > product2.price ? -1 : 1,
+
+    // сначала "выгодние"
+    4: (product1: productT, product2: productT) =>
+      product1.price - product1.bonusAmount >
+      product2.price - product2.bonusAmount
+        ? 1
+        : -1,
+
+    // сначала больше бонусов
+    5: (product1: productT, product2: productT) =>
+      product1.bonusPercent > product2.bonusPercent ? -1 : 1,
   },
   delivery: {
     // любая доставка
@@ -216,7 +286,8 @@ const sortingValues = {
       "Самовывоз из магазина сегодня",
 
     // доставка завтра или позже
-    3: (product: productT) => product.deliveryPossibilities[0].displayName !==
+    3: (product: productT) =>
+      product.deliveryPossibilities[0].displayName !==
       "Самовывоз из магазина сегодня",
   },
 };
@@ -242,17 +313,19 @@ const loadData = computed(() => {
 
   console.log(appFilter?.delivery?.value);
 
-  if (appFilter?.sortVal?.value !== 1)
+  if (appFilter?.sortVal?.value !== 1) {
     products = products.sort(
       sortingValues.sort[appFilter?.sortVal?.value || 1]
     );
+  }
 
-  return products.map((product) => product);
+  appEmit("lengthProducts", products.length);
+
+  return products;
 });
 </script>
 
 <style lang="scss">
-
 .analogs {
   background: #ffffff;
   color: #2c2c2c;
@@ -321,5 +394,4 @@ const loadData = computed(() => {
     }
   }
 }
-
 </style>
