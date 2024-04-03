@@ -1,5 +1,5 @@
 <template>
-  <div :class="['modal', {'open': appProps.isOpen}]" @click="toggleModal">
+  <div :class="classes" @click="toggleModal">
     <button class="modal__close">
       <span>X</span>
     </button>
@@ -13,8 +13,9 @@
 // import { defineProps } from "vue";
 
 type TProps = {
+  customClass?: [], 
   modalName: string,
-  isOpen: boolean | undefined,
+  isOpen?: boolean,
 }
 
 const appEmit = defineEmits(["toggleOpen"]);
@@ -22,6 +23,7 @@ const appEmit = defineEmits(["toggleOpen"]);
 let appProps = (defineProps<TProps>());
 
 let appIsOpen: Ref = ref(appProps.isOpen || false);
+let classes = ['modal', {'open': appProps.isOpen}, ...(appProps.customClass || []) ]
 
 function toggleModal(e: Event) {
   if (!(e.target as HTMLElement).closest(".modal__content")) {
