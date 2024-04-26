@@ -1,5 +1,5 @@
 <template>
-  <div class="product" :data-name="app.getTitle()">
+  <div v-if="product" class="product" :data-name="app.getTitle()">
     <div class="product__img">
       <img :src="app.petImg()" :alt="app.getTitle()" loading="lazy" />
     </div>
@@ -14,14 +14,11 @@
           :style="`--bonus-percent: ${app.getBonus().percent}%`"
           v-html="app.getBonus().priceFormat"
         ></div>
-        <div 
-          class="val__price-bonus" 
-          v-html="app.getBonus().priceBonus"
-        ></div>
+        <div class="val__price-bonus" v-html="app.getBonus().priceBonus"></div>
       </div>
 
       <div class="product__footer">
-        <div class="product__merchant">
+        <div class="product__merchant" @click="app.getTooltipContent">
           <div v-if="app.getMerchant().img" class="merchant__img">
             <img :src="app.getMerchant().img" alt="" />
           </div>
@@ -34,15 +31,27 @@
         </button>
       </div>
     </div>
+    <div class="product__sub-info_wrap">
+      <div class="product__sub-info">
+        <div
+          class="info__item"
+          v-for="{ title, value } in product.goods.attributes"
+          :key="value"
+        >
+          <span>{{ title }}: </span>
+          <span>{{ value }};</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { productT } from "@/types/product";
+import type { TProduct } from "@/types/product";
 import { formatPrice } from "@/other/js/helper.js";
 
 type PropsType = {
-  product: productT;
+  product: TProduct;
   defaultInfo?: {
     bonusPercent?: number;
   };
@@ -101,7 +110,7 @@ class ProductApp {
 
   getLink() {
     return product?.goods?.webUrl
-      ? `${product.goods.webUrl}#?details_block=prices`
+      ? `${product.goods.webUrl}`
       : "";
   }
 
@@ -150,17 +159,25 @@ $productWidth: 340px;
 }
 
 .product {
+  position: relative;
   width: $productWidth;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0px 0px 25px rgba(255, 255, 255, 0.5);
+  box-shadow: var(--global-shadow);
   border-radius: 8px;
+
+  &:hover {
+    .product__sub-info_wrap {
+      opacity: 1;
+      pointer-events: all;
+    }
+  }
 
   &__img {
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
     max-width: 100%;
     height: $productWidth;
     background: #fff;
@@ -173,6 +190,7 @@ $productWidth: 340px;
     }
   }
 
+  // body
   &__body {
     padding: 10px;
     gap: 20px;
@@ -186,6 +204,7 @@ $productWidth: 340px;
     text-overflow: ellipsis;
     display: -webkit-box;
     overflow: hidden;
+    height: 36px;
   }
 
   &__price {
@@ -254,6 +273,7 @@ $productWidth: 340px;
         height: 100%;
         border-radius: 50%;
         display: flex;
+        flex-shrink: 0;
         overflow: hidden;
         background: #fff;
 
@@ -267,6 +287,36 @@ $productWidth: 340px;
       &__name {
         font-size: 14px;
       }
+    }
+  }
+  // ./body
+
+  &__sub-info {
+    display: flex;
+    flex-wrap: wrap;
+    width: $productWidth;
+    padding: 10px;
+    background: var(--global-bg);
+    box-shadow: var(--global-shadow);
+    border-radius: 0 0 8px 8px;
+
+    &_wrap {
+      pointer-events: none;
+      opacity: 0;
+
+      transition: 0.3s;
+      padding-bottom: 25px;
+      width: calc(100% + 50px);
+      position: absolute;
+      left: -25px;
+      top: calc(100% - 10px);
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+    }
+
+    .info__item {
+      margin-right: 10px;
     }
   }
 }
