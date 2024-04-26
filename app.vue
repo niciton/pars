@@ -9,7 +9,6 @@
 </template>
 
 <script setup lang="ts">
-
 </script>
 
 <style lang="scss">
@@ -44,12 +43,12 @@
 
   &::before {
     font-size: 13px;
-    content: 'c';
+    content: "c";
     color: #2da110;
   }
 }
 
-button, 
+button,
 select {
   cursor: pointer;
 }
@@ -85,8 +84,11 @@ h6 {
 
 body {
   --green: #2da110;
-  background: #000;
-  color: #c7c7c7;
+  --global-bg: #000;
+  --global-color: #c7c7c7;
+  --global-shadow: 0px 0px 25px rgba(255, 255, 255, 0.5);
+  background: var(--global-bg);
+  color: var(--global-color);
   font-family: sans-serif;
   margin: 0;
   padding: 0;
