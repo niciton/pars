@@ -3,7 +3,7 @@ import tippy, {
   hideAll
 } from "tippy.js";
 
-import "@css/libs/tippy";
+import "@/other/style/tippy.scss";
 
 tippy.setDefaultProps({
   theme: "light",
