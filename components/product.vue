@@ -18,7 +18,7 @@
       </div>
 
       <div class="product__footer">
-        <div class="product__merchant" @click="app.getTooltipContent">
+        <div class="product__merchant" :data-merchant-id="product.favoriteOffer.merchant.id">
           <div v-if="app.getMerchant().img" class="merchant__img">
             <img :src="app.getMerchant().img" alt="" />
           </div>
@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import type { TProduct } from "@/types/product";
+import type { TProduct } from "~/types/base/product";
 import { formatPrice } from "@/other/js/helper.js";
 
 type PropsType = {
@@ -140,6 +140,18 @@ class ProductApp {
     // })
     // product?.goods?.webUrl
   }
+
+  async getTooltipContent() {
+    fetch("https://megamarket.ru/api/mobile/v1/partnerService/merchant/legalInfo/get", {
+      "headers": {
+        "content-type": "application/json",
+      },
+      "body": `{"merchantId": ${product.favoriteOffer.merchant.id}}`,
+      "method": "POST",
+    }).then(async (res) => {
+      const content = await res.json();
+    })
+  }
 }
 
 const app = new ProductApp();
@@ -167,7 +179,10 @@ $productWidth: 340px;
   border-radius: 8px;
 
   &:hover {
+    z-index: 5;
+
     .product__sub-info_wrap {
+      z-index: 5;
       opacity: 1;
       pointer-events: all;
     }
@@ -266,6 +281,7 @@ $productWidth: 340px;
     align-items: center;
     height: 28px;
     gap: 5px;
+    cursor: pointer;
 
     .merchant {
       &__img {
