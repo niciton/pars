@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import type { TProduct } from "@/types/product";
+import type { TProduct } from "~/types/base/product";
 import { formatNumber, formatPrice } from '@/other/js/helper';
 import type { TModalEmitEvent } from './appModal.vue';
 import type { TRequestProductGet } from '@/types/api/product';

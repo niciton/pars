@@ -1,7 +1,7 @@
 import { defineEventHandler } from 'h3';
 import * as path from 'node:path'
 import * as fs from 'node:fs'
-import type { TProduct } from '~/types/product';
+import type { TProduct } from '~/types/base/product';
 import type { TRequestProductGet } from '~/types/api/product';
 
 export default defineEventHandler(async (event) => {
