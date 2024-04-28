@@ -21,6 +21,8 @@
     "vue-router": "^4.2.5"
   },
   "dependencies": {
+    "@fancyapps/fancybox": "^3.5.7",
+    "@fancyapps/ui": "^4.0.31",
     "axios": "^1.6.2",
     "browser-env": "^3.3.0",
     "cheerio": "^1.0.0-rc.12",
@@ -28,6 +30,7 @@
     "pinia": "^2.1.7",
     "puppeteer": "^22.3.0",
     "puppeteer-firefox": "^0.5.1",
+    "tippy.js": "^6.3.7",
     "vuex": "^4.1.0"
   }
 }

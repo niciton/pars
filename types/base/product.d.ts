@@ -1,4 +1,4 @@
-type productT = {
+type TProduct = {
   "goods": {
     "goodsId": string,
     "title": string,
@@ -197,10 +197,10 @@ type productT = {
 }
 
 export {
-  productT,
+  TProduct,
 }
 
-const product: productT = {
+const product: TProduct = {
   "goods": {
     "goodsId": "600012755497_82379",
     "title": "Видеокарта Palit NVIDIA GeForce RTX 4060 DUAL OC (NE64060T19P1-1070D)",

@@ -1,5 +1,8 @@
 <template>
-  <div :class="classes" @click="toggleModal">
+  <div
+    :class="['modal', { open: appIsOpen }, ...(appProps.customClass || [])]"
+    @click="toggleModal"
+  >
     <button class="modal__close">
       <span>X</span>
     </button>
@@ -10,31 +13,42 @@
 </template>
 
 <script setup lang="ts">
-// import { defineProps } from "vue";
-
-type TProps = {
-  customClass?: [], 
-  modalName: string,
-  isOpen?: boolean,
+type TModalEmitEvent = { 
+  isOpen: boolean 
 }
 
-const appEmit = defineEmits(["toggleOpen"]);
+type TProps = {
+  customClass?: [];
+  modalName: string;
+  isOpen?: boolean;
+};
 
-let appProps = (defineProps<TProps>());
+export type { TModalEmitEvent };
 
-let appIsOpen: Ref = ref(appProps.isOpen || false);
-let classes = ['modal', {'open': appProps.isOpen}, ...(appProps.customClass || []) ]
+const appEmit = defineEmits<{
+  (e: "toggleOpen", isOpen: TModalEmitEvent): void;
+}>();
+
+let appProps = defineProps<TProps>();
+
+let appIsOpen: boolean = appProps.isOpen || false;
 
 function toggleModal(e: Event) {
   if (!(e.target as HTMLElement).closest(".modal__content")) {
-    appIsOpen.value = false;
+    appIsOpen = false;
 
     appEmit("toggleOpen", {
       isOpen: false,
-    })
+    });
   }
 }
 
+watch(
+  () => appProps.isOpen,
+  () => {
+    appIsOpen = appProps.isOpen;
+  }
+);
 </script>
 
 <style lang="scss">
@@ -57,7 +71,7 @@ function toggleModal(e: Event) {
     opacity: 1;
     pointer-events: all;
   }
-  
+
   &__content {
     cursor: auto;
     border-radius: 9px;

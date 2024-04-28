@@ -10,7 +10,7 @@ const url = {
   market: "https://megamarket.ru/catalog/videokarty/#?filters=%7B%2288C83F68482F447C9F4E401955196697%22%3A%7B%22min%22%3A32302%2C%22max%22%3A85000%7D%7D",
   vCarts: `https://megamarket.ru/catalog/videokarty`,
   kulery: "https://megamarket.ru/catalog/kulery-dlya-processora/",
-  platy: "https://megamarket.ru/catalog/materinskie-platy"
+  platy: "https://megamarket.ru/catalog/materinskie-platy",
 };
 var products = [];
 
