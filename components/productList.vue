@@ -4,7 +4,7 @@
     @click="listingProductClick"
   >
     <div v-if="isLoad" class="products">
-      <template v-for="(product, index) in loadData" :key="index">
+      <template v-for="(product) in loadData" :key="product.goods.webUrl">
         <product :product="product" />
       </template>
     </div>
@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { copyToClipboard } from "@/other/js/helper.js";
-import type { TProduct } from "@/types/product";
+import type { TProduct } from "@/types/base/product";
 import type { TRequestProductGet } from "@/types/api/product";
 
 type filterProps = {
@@ -57,7 +57,10 @@ function getProducts() {
     },
   };
 
-  const { data }: { data: Ref<TProduct[]> } = useFetch("/api/products/get", fetchOption);
+  const { data }: { data: Ref<TProduct[]> } = useFetch(
+    "/api/products/get",
+    fetchOption
+  );
   const jsonData = data.value || [];
 
   console.log(jsonData[0]);
@@ -79,9 +82,8 @@ async function listingProductClick(e: Event) {
   }
 
   if (analogBtn) {
-    // const url = analogBtn.getAttribute("data-link") || "";
     productLink.value = analogBtn.getAttribute("data-link") || "";
-
+    return;
   }
 }
 
@@ -93,8 +95,12 @@ try {
 
 watch(appProps, ({ filters }) => {
   Object.assign(appFilter, filters);
-  console.log(appFilter.delivery?.value);
+  console.log(appFilter.searchVal?.value);
 });
+
+if (process.client) {
+  import("@/other/js/merchant");
+}
 
 const sortingValues = {
   sort: {
