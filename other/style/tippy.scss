@@ -1,4 +1,4 @@
-@import "../../../node_modules/tippy.js/dist/tippy";
+@import "../../node_modules/tippy.js/dist/tippy";
 
 .tippy-box[data-theme~="app_default"] {
   padding: 20px;
@@ -11,5 +11,21 @@
   .tippy-content {
     padding: 0;
     text-align: center;
+  }
+
+  &[data-placement^="top"] > .tippy-arrow:before {
+    border-top-color: #fff;
+  }
+
+  &[data-placement^="bottom"] > .tippy-arrow:before {
+    border-bottom-color: #fff;
+  }
+
+  &[data-placement^="left"] > .tippy-arrow:before {
+    border-left-color: #fff;
+  }
+
+  &[data-placement^="right"] > .tippy-arrow:before {
+    border-right-color: #fff;
   }
 }
