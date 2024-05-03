@@ -23,6 +23,28 @@ delegate("body", {
   },
 });
 
+function getFullDate({ dateActivation }: TMerchant ) {
+  const startYear = new Date(dateActivation).getFullYear();
+  const startMonth = new Date(dateActivation).getMonth();
+
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+
+  const yearNumber = currentYear - startYear;
+  const monthNumber = Math.max(currentMonth, startMonth) - Math.min(currentMonth, startMonth);
+
+  const yearText = `${yearNumber} ${getDateText(yearNumber, ["год", "года", "лет"])}`
+  const monthText = `${monthNumber} ${getDateText(yearNumber, ["месяц", "месяца", "месяцев"]) }`
+
+  return `${yearNumber ? `${yearText} ` : ""}${monthText}`;
+}
+
+function getDateText(dateNumber: number, names: string[]) {
+  if (dateNumber > 4) return names[2]
+  else if (dateNumber > 1) return names[1]
+  return names[0]
+}
+
 async function setMerchant(instance: Instance) {
   const merchantId: string =
     instance.reference.getAttribute("data-merchant-id") || "";
@@ -96,7 +118,7 @@ async function setMerchant(instance: Instance) {
               </div> 
               <div class="merchant__table_row-divider"></div> 
               <div class="merchant__table_row-value">
-                5 лет 11 мес.
+                ${getFullDate(merchantInfo)}
               </div>
             </div>
           </div>
