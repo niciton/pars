@@ -1,12 +1,43 @@
 <template>
-  <div v-if="product" class="product" :data-name="app.getTitle()">
+  <div v-if="product" class="product" :data-name="app.getTitle().attrTitle">
     <div class="product__img">
-      <img :src="app.petImg()" :alt="app.getTitle()" loading="lazy" />
+      <img :src="app.petImg()" :alt="app.getTitle().attrTitle" loading="lazy" />
     </div>
     <div class="product__body">
-      <a :href="app.getWebUrl()" class="product__title" :title="app.getTitle()">
-        {{ app.getTitle() }}
-      </a>
+      <div class="product__title">
+        <div class="product__title_inner">
+          <div class="product__title_copy" :data-title="app.getTitle().attrTitle">
+            <app-svg
+              link="/img/product.svg"
+              svgId="copy"
+              :size="24"
+              fill="#fff"
+            />
+            <span> скопировать заголовок </span>
+          </div>
+          <a
+            :href="product.goods.webUrl"
+            target="_blank"
+            class="product__title_market"
+          >
+            <span> перейти на megamarket </span>
+            <img
+              width="24"
+              height="24"
+              src="/img/market_32.png"
+              alt="logo megamarket"
+            />
+          </a>
+        </div>
+        <a
+          :href="app.getWebUrl()"
+          class="product__title_link"
+          :title="app.getTitle().attrTitle"
+        >
+          {{ app.getTitle().title }}
+        </a>
+      </div>
+
       <div class="product__price">
         <div class="val__rub" v-html="app.getPrice()"></div>
         <div
@@ -18,7 +49,10 @@
       </div>
 
       <div class="product__footer">
-        <div class="product__merchant" :data-merchant-id="product.favoriteOffer.merchant.id">
+        <div
+          class="product__merchant"
+          :data-merchant-id="product.favoriteOffer.merchant.id"
+        >
           <div v-if="app.getMerchant().img" class="merchant__img">
             <img :src="app.getMerchant().img" alt="" />
           </div>
@@ -67,7 +101,11 @@ class ProductApp {
   }
 
   getTitle() {
-    return product?.goods?.title ? product.goods.title : "";
+    const title = product?.goods?.title ? product.goods.title : "";
+    return {
+      title,
+      attrTitle: title.replace(/["']/g, ""),
+    };
   }
 
   getPrice() {
@@ -109,9 +147,7 @@ class ProductApp {
   }
 
   getLink() {
-    return product?.goods?.webUrl
-      ? `${product.goods.webUrl}`
-      : "";
+    return product?.goods?.webUrl ? `${product.goods.webUrl}` : "";
   }
 
   getMerchant() {
@@ -142,15 +178,18 @@ class ProductApp {
   }
 
   async getTooltipContent() {
-    fetch("https://megamarket.ru/api/mobile/v1/partnerService/merchant/legalInfo/get", {
-      "headers": {
-        "content-type": "application/json",
-      },
-      "body": `{"merchantId": ${product.favoriteOffer.merchant.id}}`,
-      "method": "POST",
-    }).then(async (res) => {
+    fetch(
+      "https://megamarket.ru/api/mobile/v1/partnerService/merchant/legalInfo/get",
+      {
+        headers: {
+          "content-type": "application/json",
+        },
+        body: `{"merchantId": ${product.favoriteOffer.merchant.id}}`,
+        method: "POST",
+      }
+    ).then(async (res) => {
       const content = await res.json();
-    })
+    });
   }
 }
 
@@ -195,7 +234,9 @@ $productWidth: 340px;
     overflow: hidden;
     max-width: 100%;
     height: $productWidth;
+    // height: var(--product-height);
     background: #fff;
+    border-radius: var(--radius-base) var(--radius-base) 0px 0px;
 
     img {
       max-width: 100%;
@@ -214,12 +255,65 @@ $productWidth: 340px;
   }
 
   &__title {
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    overflow: hidden;
-    height: 36px;
+    position: relative;
+
+    &:hover {
+      .product__title_inner {
+        opacity: 1;
+        pointer-events: all;
+      }
+    }
+
+    &_link {
+      font-size: 16px;
+      line-height: 18px;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      overflow: hidden;
+      height: 36px;
+    }
+
+    &_inner {
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      left: -10px;
+      bottom: 100%;
+      width: calc(100% + 20px);
+      padding: 10px;
+      background: var(--global-bg);
+      border-radius: var(--radius-base) var(--radius-base) 0px 0px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    &_market,
+    &_copy {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      cursor: pointer;
+
+      &:hover {
+        span {
+          pointer-events: all;
+          opacity: 1;
+        }
+      }
+
+      span {
+        pointer-events: none;
+        opacity: 0;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        transition: 0.3s;
+      }
+    }
   }
 
   &__price {

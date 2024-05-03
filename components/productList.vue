@@ -71,13 +71,13 @@ function getProducts() {
 }
 
 async function listingProductClick(e: Event) {
-  const title = (e.target as HTMLElement).closest(".product__title[title]");
+  const copyTitle = (e.target as HTMLElement).closest(".product .product__title_copy");
   const analogBtn = (e.target as HTMLElement).closest(
     ".product__analogs[data-link]"
   );
 
-  if (title) {
-    copyToClipboard(title.getAttribute("title")?.trim() || "");
+  if (copyTitle) {
+    copyToClipboard(copyTitle.getAttribute("data-title")?.trim() || "");
     return;
   }
 
