@@ -13,6 +13,7 @@
 
 <style lang="scss">
 @import "@/other/style/load.scss";
+@import "@/other/style/vars.scss";
 
 * {
   box-sizing: border-box;
@@ -83,11 +84,6 @@ h6 {
 }
 
 body {
-  --green: #2da110;
-  --global-bg: #000;
-  --global-color: #c7c7c7;
-  --black-color: #15181a;
-  --global-shadow: 0px 0px 25px rgba(255, 255, 255, 0.5);
   background: var(--global-bg);
   color: var(--global-color);
   font-family: sans-serif;
