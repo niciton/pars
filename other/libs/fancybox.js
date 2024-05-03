@@ -1,7 +1,7 @@
 import { Fancybox } from "@fancyapps/ui";
 import "@fancyapps/ui/dist/fancybox.css";
 import "@css/libs/fancybox/default.scss";
-import ru from "@fancyapps/ui/src/Fancybox/l10n/ru.js";
+// import ru from "@fancyapps/ui/src/Fancybox/l10n/ru.js";
 
 const fancyOptions = {
   infinite: true,
@@ -93,6 +93,6 @@ const processImgSrc = (link) => {
   return path.slice(0, -1).concat(`original_${fileName}`).join("/");
 };
 
-Fancybox.defaults.l10n = ru;
+// Fancybox.defaults.l10n = ru;
 
 export { Fancybox, fancyOptions };

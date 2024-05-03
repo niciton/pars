@@ -75,6 +75,9 @@ async function listingProductClick(e: Event) {
   const analogBtn = (e.target as HTMLElement).closest(
     ".product__analogs[data-link]"
   );
+  const titleImg = (e.target as HTMLElement).closest(
+    ".product__img[data-id]"
+  );
 
   if (copyTitle) {
     copyToClipboard(copyTitle.getAttribute("data-title")?.trim() || "");
@@ -83,6 +86,22 @@ async function listingProductClick(e: Event) {
 
   if (analogBtn) {
     productLink.value = analogBtn.getAttribute("data-link") || "";
+    return;
+  }
+
+  if (titleImg) {
+    const fetchOption: TRequestProductGet = {
+      method: "post",
+      body: {
+        getAct: "all",
+      },
+    };
+    
+    const {data}: { data: Ref<TProduct[]> } = await useFetch("/api/products/get", fetchOption);
+    console.log(data);
+    import(/* webpackChunkName: "fancybox" */ "@/other/libs/fancybox.js").then(({ Fancybox, fancyOptions }) => {
+      Fancybox.show(data.value[0].goods.images, fancyOptions);
+    });
     return;
   }
 }

@@ -1,12 +1,15 @@
 <template>
   <div v-if="product" class="product" :data-name="app.getTitle().attrTitle">
-    <div class="product__img">
+    <div class="product__img" :data-id="app.getLink()">
       <img :src="app.petImg()" :alt="app.getTitle().attrTitle" loading="lazy" />
     </div>
     <div class="product__body">
       <div class="product__title">
         <div class="product__title_inner">
-          <div class="product__title_copy" :data-title="app.getTitle().attrTitle">
+          <div
+            class="product__title_copy"
+            :data-title="app.getTitle().attrTitle"
+          >
             <app-svg
               link="/img/product.svg"
               svgId="copy"
@@ -289,13 +292,17 @@ $productWidth: 340px;
       justify-content: space-between;
     }
 
+    &_market {
+      justify-content: flex-end;    
+    }
+
     &_market,
     &_copy {
       display: flex;
       align-items: center;
-      gap: 10px;
       white-space: nowrap;
       cursor: pointer;
+      width: 40%;
 
       &:hover {
         span {
@@ -307,9 +314,12 @@ $productWidth: 340px;
       span {
         pointer-events: none;
         opacity: 0;
+        display: flex;
+        align-items: center;
         position: absolute;
         left: 50%;
         top: 50%;
+        height: 100%;
         transform: translate(-50%, -50%);
         transition: 0.3s;
       }
