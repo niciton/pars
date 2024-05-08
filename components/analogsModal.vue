@@ -10,8 +10,19 @@
           <div class="analogs__img">
             <img :src="mainAnalogInfo.goods.titleImage" alt="" lang="lazy" />
           </div>
-          <div class="analogs__title">
-            {{ mainAnalogInfo.goods.title }}
+          <div class="analogs__info">
+            <div class="analogs__title">
+              <!-- replace обрезает до начала названия -->
+              {{
+                mainAnalogInfo.goods.title.replace(
+                  /.+?(?=[а-я]).+?(?=[a-z])/i,
+                  ""
+                )
+              }}
+            </div>
+            <div class="analogs__quantity">
+              количество аналов: {{ analogsArr.length }}
+            </div>
           </div>
         </div>
         <div class="analog__wrap">
@@ -22,17 +33,23 @@
           >
             <div class="analog__price-bonus">
               "выгода":
-              {{ formatPrice(analog.finalPrice - (analog.bonusAmount || analog.finalPrice * 0.01)) }} ₽
+              {{
+                formatPrice(
+                  analog.finalPrice -
+                    (analog.bonusAmount || analog.finalPrice * 0.01)
+                )
+              }}
+              ₽
             </div>
             <div class="analog__price">цена: {{ analog.finalPrice }} ₽</div>
             <div class="analog__bonus">
               бонусы:
               <div class="bonus">
-                {{ formatNumber(analog.bonusAmount || analog.finalPrice * 0.01) }}
+                {{
+                  formatNumber(analog.bonusAmount || analog.finalPrice * 0.01)
+                }}
                 <div class="spasibo"></div>
-                <div class="percent">
-                  {{ analog.bonusPercent || 1 }} %
-                </div>
+                <div class="percent">{{ analog.bonusPercent || 1 }} %</div>
               </div>
             </div>
           </div>
@@ -47,15 +64,18 @@
 
 <script setup lang="ts">
 import type { TProduct } from "~/types/base/product";
-import { formatNumber, formatPrice } from '@/other/js/helper';
-import type { TModalEmitEvent } from './appModal.vue';
-import type { TRequestProductGet } from '@/types/api/product';
+import { formatNumber, formatPrice } from "@/other/js/helper";
+import type { TModalEmitEvent } from "./appModal.vue";
+import type { TRequestProductGet } from "@/types/api/product";
 
 const appProps = defineProps<{
-  link: string,
+  data: {
+    link: string;
+  };
 }>();
 
-watch(appProps, async ({link}) => {
+watch(appProps, async ({ data }) => {
+  const { link } = data;
   if (!link) return;
 
   isOpenAnalogsModal.value = true;
@@ -68,7 +88,8 @@ watch(appProps, async ({link}) => {
     },
   };
   // const arr: TProduct[] = useFetch("/api/products/get", fetchOption)?.data?.value || [];
-  const { data: arr }: { data: Ref<TProduct[]> } = await useFetch("/api/products/get", fetchOption) || [];
+  const { data: arr }: { data: Ref<TProduct[]> } =
+    (await useFetch("/api/products/get", fetchOption)) || [];
 
   arr.value.sort((analog1, analog2) => {
     const price1 = analog1.finalPrice - analog1.bonusAmount;
@@ -79,16 +100,15 @@ watch(appProps, async ({link}) => {
 
   Object.assign(mainAnalogInfo, arr.value[0]);
   analogsArr.push(...arr.value);
-})
+});
 
 let isOpenAnalogsModal: Ref<boolean> = ref(false);
 let mainAnalogInfo = reactive(<TProduct>{});
 let analogsArr: TProduct[] = reactive([]);
 
-
-function setIsOpenAnalogsModal(e: TModalEmitEvent) {
+function setIsOpenAnalogsModal({ isOpen }: TModalEmitEvent) {
   analogsArr.length = 0;
-  isOpenAnalogsModal.value = e.isOpen;
+  isOpenAnalogsModal.value = isOpen;
 }
 </script>
 
@@ -122,7 +142,13 @@ function setIsOpenAnalogsModal(e: TModalEmitEvent) {
     }
   }
 
+  &__info {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
   &__title {
+    width: 100%;
     font-size: 30px;
   }
 
