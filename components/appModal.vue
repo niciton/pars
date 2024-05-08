@@ -1,9 +1,9 @@
 <template>
   <div
     :class="['modal', { open: appIsOpen }, ...(appProps.customClass || [])]"
-    @click="toggleModal"
+    @click.self="() => setModal(false)"
   >
-    <button class="modal__close">
+    <button class="modal__close" @click="() => setModal(false)">
       <span>X</span>
     </button>
     <div class="modal__content container">
@@ -13,9 +13,9 @@
 </template>
 
 <script setup lang="ts">
-type TModalEmitEvent = { 
-  isOpen: boolean 
-}
+export type TModalEmitEvent = {
+  isOpen: boolean;
+};
 
 type TProps = {
   customClass?: [];
@@ -23,25 +23,26 @@ type TProps = {
   isOpen?: boolean;
 };
 
-export type { TModalEmitEvent };
-
 const appEmit = defineEmits<{
-  (e: "toggleOpen", isOpen: TModalEmitEvent): void;
+  (eventName: "toggleOpen", eventObj: TModalEmitEvent): void;
 }>();
 
 let appProps = defineProps<TProps>();
 
 let appIsOpen: boolean = appProps.isOpen || false;
 
-function toggleModal(e: Event) {
-  if (!(e.target as HTMLElement).closest(".modal__content")) {
-    appIsOpen = false;
+function setModal(isOpen: boolean) {
+  if (appIsOpen === isOpen) return;
+  appIsOpen = isOpen;
 
-    appEmit("toggleOpen", {
-      isOpen: false,
-    });
-  }
+  appEmit("toggleOpen", {
+    isOpen,
+  });
 }
+
+if (process.client) document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") setModal(false);
+})
 
 watch(
   () => appProps.isOpen,
