@@ -4,13 +4,13 @@
     @click="listingProductClick"
   >
     <div v-if="isLoad" class="products">
-      <template v-for="(product) in loadData" :key="product.goods.webUrl">
+      <template v-for="product in loadData" :key="product.goods.webUrl">
         <product :product="product" />
       </template>
     </div>
     <div v-else class="load-screen">load...</div>
   </div>
-  <analogs-modal :link="productLink" />
+  <analogs-modal :data="productLink" />
 </template>
 
 <script setup lang="ts">
@@ -47,7 +47,9 @@ const appEmit = defineEmits(["lengthProducts"]);
 let data: readonlyTProduct[] = reactive([]);
 let isLoad: Ref = ref(false);
 
-let productLink: Ref<string> = ref("");
+let productLink: Ref<{ link: string }> = toRef({
+  link: "",
+});
 
 function getProducts() {
   const fetchOption: TRequestProductGet = {
@@ -71,13 +73,13 @@ function getProducts() {
 }
 
 async function listingProductClick(e: Event) {
-  const copyTitle = (e.target as HTMLElement).closest(".product .product__title_copy");
+  const copyTitle = (e.target as HTMLElement).closest(
+    ".product .product__title_copy"
+  );
   const analogBtn = (e.target as HTMLElement).closest(
     ".product__analogs[data-link]"
   );
-  const titleImg = (e.target as HTMLElement).closest(
-    ".product__img[data-id]"
-  );
+  const titleImg = (e.target as HTMLElement).closest(".product__img[data-id]");
 
   if (copyTitle) {
     copyToClipboard(copyTitle.getAttribute("data-title")?.trim() || "");
@@ -85,7 +87,9 @@ async function listingProductClick(e: Event) {
   }
 
   if (analogBtn) {
-    productLink.value = analogBtn.getAttribute("data-link") || "";
+    productLink.value = {
+      link: analogBtn.getAttribute("data-link") || "",
+    };
     return;
   }
 
@@ -93,15 +97,25 @@ async function listingProductClick(e: Event) {
     const fetchOption: TRequestProductGet = {
       method: "post",
       body: {
-        getAct: "all",
+        getAct: "analog",
+        url: titleImg.getAttribute("data-id") || "",
       },
     };
-    
-    const {data}: { data: Ref<TProduct[]> } = await useFetch("/api/products/get", fetchOption);
-    console.log(data);
-    import(/* webpackChunkName: "fancybox" */ "@/other/libs/fancybox.js").then(({ Fancybox, fancyOptions }) => {
-      Fancybox.show(data.value[0].goods.images, fancyOptions);
-    });
+
+    const { data }: { data: Ref<TProduct[]> } = await useFetch(
+      "/api/products/get",
+      fetchOption
+    );
+
+    import(/* webpackChunkName: "fancybox" */ "~/other/libs/fancybox.js").then(
+      ({ Fancybox, fancyOptions }) => {
+        const images = data.value[0].goods.images.map((img) => ({
+          thumb: img.replace(/mid./i, "mid7"),
+          src: img.replace(/mid./i, "big2"),
+        }));
+        Fancybox.show(images, fancyOptions);
+      }
+    );
     return;
   }
 }
@@ -189,8 +203,6 @@ const loadData = computed(() => {
 
     return isSearch && isExclude && isDelivery;
   });
-
-  console.log(appFilter?.delivery?.value);
 
   if (appFilter?.sortVal?.value !== 1) {
     products = products.sort(
