@@ -236,10 +236,12 @@ $productWidth: 340px;
     align-items: center;
     overflow: hidden;
     max-width: 100%;
-    height: $productWidth;
-    // height: var(--product-height);
+    // height: ;
+    height: var(--product-height, 340px);
+    min-height: 30px;
     background: #fff;
     border-radius: var(--radius-base) var(--radius-base) 0px 0px;
+    cursor: pointer;
 
     img {
       max-width: 100%;
@@ -293,7 +295,7 @@ $productWidth: 340px;
     }
 
     &_market {
-      justify-content: flex-end;    
+      justify-content: flex-end;
     }
 
     &_market,
@@ -302,11 +304,10 @@ $productWidth: 340px;
       align-items: center;
       white-space: nowrap;
       cursor: pointer;
-      width: 40%;
+      width: 49%;
 
       &:hover {
         span {
-          pointer-events: all;
           opacity: 1;
         }
       }
