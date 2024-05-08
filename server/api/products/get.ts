@@ -4,7 +4,7 @@ import * as fs from 'node:fs'
 import type { TProduct } from '~/types/base/product';
 import type { TRequestProductGet } from '~/types/api/product';
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<TProduct[] | { error: string }> => {
   if (event.method !== "POST") return { error: "not POST request" }
 
   const requestBody: TRequestProductGet['body'] = (await readBody(event));
