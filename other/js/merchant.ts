@@ -2,7 +2,7 @@ import type { Instance } from 'tippy.js';
 import type { TMerchant } from '@/types/request/merchant';
 import { delegate } from "@/other/libs/tippy";
 
-import "@/other/style/merchant.scss"
+import "@/other/style/components/merchant.scss"
 
 let merchantIds: { [k: string]: TMerchant } = {};
 
@@ -36,7 +36,7 @@ function getFullDate({ dateActivation }: TMerchant ) {
   const yearText = `${yearNumber} ${getDateText(yearNumber, ["год", "года", "лет"])}`
   const monthText = `${monthNumber} ${getDateText(yearNumber, ["месяц", "месяца", "месяцев"]) }`
 
-  return `${yearNumber ? `${yearText} ` : ""}${monthText}`;
+  return `${yearNumber ? `${yearText} ` : ""}${monthNumber ? monthText : ""}`;
 }
 
 function getDateText(dateNumber: number, names: string[]) {
