@@ -1,6 +1,7 @@
 import { Fancybox } from "@fancyapps/ui";
+// import type { OptionsType } from '@fancyapps/ui/types/Fancybox/options';
 import "@fancyapps/ui/dist/fancybox.css";
-import "@css/libs/fancybox/default.scss";
+import "@/other/style/libs/fancybox.scss";
 // import ru from "@fancyapps/ui/src/Fancybox/l10n/ru.js";
 
 const fancyOptions = {
@@ -9,70 +10,73 @@ const fancyOptions = {
   click: false,
   id: "custom",
   on: {
-    prepare: (instance) => {
+    prepare: (instance) =>
+    {
       const isSingle = instance.items.length === 1;
-      const wrapper = `<div class="fancybox__inner ${isSingle ? "is-single " : ""}">
-        <div class="h-full"></div>
-      </div>`;
-      $(instance.$container)
-        .find(".fancybox__toolbar, .fancybox__carousel, .fancybox__thumbs")
-        .wrapAll(wrapper);
+      // $(instance.$container)
+      //   .find(".fancybox__toolbar, .fancybox__carousel, .fancybox__thumbs")
+      //   .wrapAll(wrapper);
+      let wrapChild = [];
+      console.log(instance.$container);
+      const wrap = new DOMParser().parseFromString(
+        `<div class="fancybox__inner ${isSingle ? "is-single " : ""}">
+          <div class="h-full" style="height: 100%;"></div>
+        </div>`, "text/html");
+      instance.$container.appendChild(wrap.querySelector(".fancybox__inner"));
+      const instanceInner = instance.$container.querySelector(".fancybox__inner .h-full");
+
+      instance.$container.querySelectorAll(".fancybox__toolbar, .fancybox__carousel, .fancybox__thumbs").forEach((item) =>
+      {
+        // instanceInner.appendChild(item.cloneNode(true));
+        // // const newOuter = parser.parseFromString
+
+        // item.remove();
+        // item.outerHTML = newOuter;
+      });
     },
-    init(instance) {
-      instance.items.forEach((slide) => {
+    init(instance)
+    {
+      instance.items.forEach((slide) =>
+      {
         const src = slide?.$thumb?.dataset?.src;
-        if (src) {
+        if (src)
+        {
           slide.src = processImgSrc(src);
           slide.thumb = src;
         }
       });
     },
-    click: (instance, event) => {
-      const { classList } = event.target;
-      if (classList.contains("carousel__button") || classList.contains("fancybox__backdrop")) {
+    click: (instance, event) =>
+    {
+      const { classList } = (event.target);
+      if (classList.contains("carousel__button") || classList.contains("fancybox__backdrop"))
+      {
         instance.close();
       }
     },
   },
   Toolbar: {
-    display: ["counter", "download", "thumbs", "close"],
+    display: ["counter", "thumbs", "close"],
     items: {
       close: {
         html: `
-          <svg class="cursor-pointer stroke-1 transition-all" width="32" height="32">
-            <use xlink:href="/img/icons.svg?v=1#close"></use>
-          </svg>
-        `,
-      },
-      download: {
-        class: "fancybox__button--download",
-        type: "link",
-        click(event) {
-          event.stopPropagation();
-        },
-        html: `
-          <svg class="cursor-pointer stroke-1 transition-all" width="32" height="32">
-            <use xlink:href="/img/icons.svg?v=1#download"></use>
-          </svg>
+          X
         `,
       },
     },
   },
   Image: {
     click: false,
+    zoom: true,
   },
 
   Carousel: {
     Navigation: {
       prevTpl: `
-        <svg class="shrink-0 cursor-pointer rotate-180 stroke-1 transition-all" width="24" height="24">
-          <use xlink:href="/img/icons.svg?v=1#arrow"></use>
-        </svg>
+        <
       `,
       nextTpl: `
-        <svg class="shrink-0 cursor-pointer stroke-1 transition-all" width="24" height="24">
-          <use xlink:href="/img/icons.svg?v=1#arrow"></use>
-        </svg>
+        >
       `,
     },
   },
@@ -82,15 +86,9 @@ const fancyOptions = {
   },
 };
 
-const processImgSrc = (link) => {
-  const path = link.split("/"),
-    fileName = path.slice(-1)[0];
-
-  if (path.includes("abcp")) {
-    return link;
-  }
-
-  return path.slice(0, -1).concat(`original_${fileName}`).join("/");
+const processImgSrc = (link) =>
+{
+  return link;
 };
 
 // Fancybox.defaults.l10n = ru;
