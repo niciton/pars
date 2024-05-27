@@ -163,7 +163,7 @@ class ProductApp {
   }
 
   getWebUrl() {
-    return `product/${product.goods.goodsId}${
+    return `/product/${product.goods.goodsId}${
       product.goods.webUrl.split("details")[1]
     }`;
   }
