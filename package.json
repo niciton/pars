@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev && cd parse && node serv.js",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
@@ -21,15 +21,14 @@
     "vue-router": "^4.2.5"
   },
   "dependencies": {
-    "@fancyapps/fancybox": "^3.5.7",
-    "@fancyapps/ui": "^5.0.36",
+    "@fancyapps/ui": "^4.0.31",
+    "@types/fancybox": "^3.5.7",
     "axios": "^1.6.2",
     "browser-env": "^3.3.0",
     "cheerio": "^1.0.0-rc.12",
     "html-element": "^2.3.1",
     "pinia": "^2.1.7",
     "puppeteer": "^22.3.0",
-    "puppeteer-firefox": "^0.5.1",
     "tippy.js": "^6.3.7",
     "vuex": "^4.1.0"
   }
